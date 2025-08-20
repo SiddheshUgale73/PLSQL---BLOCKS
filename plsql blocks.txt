@@ -1,0 +1,193 @@
+---------------------------PLSql blocks -------------
+
+1) anonymous block : a plsql block without any name is called 'Anonymous block'.
+2) Named block : a plsql block without any name is called 'named block'
+
+Ex : Procedure, function,package, trigger.
+
+--Attribute related data types :  there are two attribute related datatypes in plsql 
+
+        1) %type : it is used to take the data type, field size of the table column.
+                    it avoids mistach between data type & field size of variable & column 
+                    
+             Adavntage : we have no need to check data type and field size of a column every time when we declare 
+             
+              example : v_ename emp.ename%type;       
+                               
+        2) %rowtype : it is used to hold entire row of a table.
+                      it can hold one record only at a time.
+                      
+            advantages : -it decreses number of variable 
+                        - it reduce camplexity
+            example : v_emprecord emp%rowtype;
+            
+
+--Q.1) write a program to calculate and display the experience of given employee number .
+   
+   select * from emp;  
+   
+   
+declare 
+     v_empno emp.empno%type;
+     v_hiredate emp.hiredate%type;
+     v_exp integer;
+begin 
+        v_empno:= &empno;
+        select hiredate into v_hiredate from emp where empno=v_empno;
+        v_exp:= (sysdate-v_hiredate)/365;
+        
+   dbms_output.put_line('emp experience is :'|| v_exp ||' years');
+ end;
+ /
+ 
+set serveroutput on;
+
+
+--Q.2) write a program to find empno where name='BLAKE'
+declare 
+   v_empno int;
+begin 
+    select empno into v_empno from emp where ename='BLAKE';
+    dbms_output.put_line(v_empno);
+end;
+/
+
+----Q.3) programa to delete an employee record who has greater than 40 years of experience.
+
+declare
+
+v_empno int;
+v_hiredate date;
+v_exp int;
+
+begin 
+        v_empno:= &empno;
+        select hiredate into v_hiredate from emp where empno=v_empno;
+        
+    v_exp := (sysdate-v_hiredate)/365;
+    dbms_output.put_line('emp_experience is :'||v_exp ||'years');
+    
+    if v_exp>40 then 
+        delete from emp where empno=v_empno;
+        commit;
+        
+        dbms_output.put_line (v_empno ||'Employee record deleted');
+        
+        end if ;
+end;
+/
+
+
+----Q.4) program to increase the salary of given empno. if salary exceeds 5000 then cancel the transaction .
+
+declare 
+
+v_empno int;
+v_salary int;
+v_amount int;
+
+begin 
+ v_empno:=&empno;
+ 
+ update emp set sal=sal+v_amount where empno=v_empno; 
+ 
+ select sal into v_salary from emp where v_empno=empno;
+ 
+ if v_salary >5000 then 
+ rollback;
+            dbms_output.put_line('rolled back succesfully...');
+        else 
+        commit;
+          dbms_output.put_line('commited sucssesfully...');
+ end if ;
+end ;
+/
+
+
+
+----Q.5) program to display employee record to given employee number.
+
+declare 
+      v_empno int ;
+      v_emprecord emp%rowtype;
+
+begin
+    v_empno:= &empno;
+
+select * into v_emprecord from emp where empno=v_empno ;
+
+dbms_output.put_line(v_emprecord.ename ||' '||
+                     v_emprecord.job||' '||
+                     v_emprecord.sal||' '||
+                     v_emprecord.hiredate||' '||
+                     v_emprecord.deptno||' '||
+                     v_emprecord.comm);
+end;
+/
+
+---Q.6) program to increase the salary of an employees based on experience .
+--   if experince is greater than or equlas to 40 then increment by 20 % otherwise increment by 10%.
+     
+ declare  
+ 
+ v_empno emp.empno%type;
+ v_hiredate emp.hiredate%type;
+ v_exp integer;
+ v_per float;
+      
+  begin 
+     v_empno:=&empno;
+       select hiredate into v_hiredate from emp where empno=v_empno;
+       v_exp :=(sysdate-v_hiredate)/365;
+       
+       dbms_output.put_line('emp experience is :' ||v_exp||' years');
+       
+       if v_exp >= 40 then 
+           v_per :=0.2;
+        else 
+           v_per :=0.1;
+           
+        end if ;
+         
+        update emp set sal= sal+sal*v_per where empno=v_empno;
+        commit;
+        dbms_output.put_line(v_empno||' employee record updated....');
+        dbms_output.put_line(v_per ||' on sal incrased');
+  end ;
+  /
+  
+
+----Q.7. program to incrase salry of the given employee number based on the job as follows:
+/*
+   Manager => increment salary by 10%
+   Clerk => increment salary by 15%
+   others => increment salary by 10%
+*/
+
+declare
+ v_empno emp.empno%type;
+ v_job emp.job%type;
+ v_per number;
+
+begin
+    v_empno:=&empno;
+    
+    select job into v_job from emp where empno=v_empno;
+        if v_job='MANAGER'then
+           v_per:=0.2;
+        elsif v_job ='CLERK' then
+           v_per := 0.15;
+        else 
+            v_job :=0.1;
+        end if;
+        update emp set sal= sal+sal* v_per where empno=v_empno; 
+        
+        dbms_output.put_line('salary updated.....'||v_per); 
+     end;
+/
+
+
+
+
+
+
